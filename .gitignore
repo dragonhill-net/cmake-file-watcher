@@ -1,0 +1,7 @@
+﻿/.idea/
+/.vs/
+
+[oO]bj/
+[bB]in/
+
+*.user
