@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Dragonhill.CMakeFileWatcher.Cli</RootNamespace>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <Version Condition="$(Version) == ''">0.0.1-develop</Version>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <PackageId>Dragonhill.CMakeFileWatcher</PackageId>
+    <Authors>Stefan Klinger</Authors>
+    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <PackageIcon>dragonhill.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/dragonhill-net/cmake-file-watcher</PackageProjectUrl>
+    <Description>A tool to automatically update CMake dependencies.</Description>
+    <Copyright>Copyright ©$([System.DateTime]::Now.Year) Stefan Klinger</Copyright>
+    <PackageTags>CMake</PackageTags>
+    <RepositoryUrl>https://github.com/dragonhill-net/cmake-file-watcher</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>cmake-file-watcher</ToolCommandName>
+    
+    <PackageOutputPath>$(ProjectDir)..\..\releases\</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="nuget\dragonhill.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
+  </ItemGroup>
+
+  <Target Name="ReleasePackGitTag">
+    <Exec Command="git describe --tags" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" EchoOff="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="CurrentGitTag" />
+      <Output TaskParameter="ExitCode" PropertyName="GitExitCode" />
+    </Exec>
+    <Error Text="Could not read current git tag!" Condition="'$(GitExitCode)'!='0'" />
+
+    <PropertyGroup>
+      <Version>$([System.Text.RegularExpressions.Regex]::Match($(CurrentGitTag), `^version-(\d+\.\d+\.\d+(-\w+)?)$`).get_Groups().get_Item(1).ToString())</Version>
+    </PropertyGroup>
+    <Error Text="Not a valid version Tag: $(CurrentGitTag)" Condition="'$(Version)'==''" />
+
+    <MSBuild Projects="$(MSBuildThisFile)" Targets="Clean" Properties="Version=$(Version)" />
+    <MSBuild Projects="$(MSBuildThisFile)" Targets="pack" Properties="Version=$(Version)" />
+  </Target>
+</Project>

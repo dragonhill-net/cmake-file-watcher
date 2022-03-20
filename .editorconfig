@@ -9,5 +9,8 @@ indent_style = space
 [*.cs]
 indent_size = 4
 
+[*.csproj]
+indent_size = 2
+
 [*.yaml]
 indent_size = 2
